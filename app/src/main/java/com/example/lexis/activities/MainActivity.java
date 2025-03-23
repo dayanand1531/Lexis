@@ -1,5 +1,6 @@
 package com.example.lexis.activities;
 
+import com.example.lexis.R.id;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -49,17 +50,13 @@ public class MainActivity extends AppCompatActivity {
         final Fragment profileFragment = ProfileFragment.newInstance(ParseUser.getCurrentUser());
 
         Fragment fragment;
-        switch (item.getItemId()) {
-            case R.id.action_home:
-                fragment = feedFragment;
-                break;
-            case R.id.action_practice:
-                fragment = practiceFragment;
-                break;
-            case R.id.action_profile:
-            default:
-                fragment = profileFragment;
-                break;
+        int itemId = item.getItemId();
+        if (itemId == id.action_home) {
+            fragment = feedFragment;
+        } else if (itemId == id.action_practice) {
+            fragment = practiceFragment;
+        } else {
+            fragment = profileFragment;
         }
         fragmentManager.beginTransaction().replace(R.id.fragmentContainer, fragment).commit();
     }

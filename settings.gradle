@@ -1,2 +1,6 @@
 rootProject.name = "Lexis"
 include ':app'
+include ':likebutton'
+include ':flipview'
+include ':recyclerview-swipedecorator'
+include ':cardstackview'

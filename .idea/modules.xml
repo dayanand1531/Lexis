@@ -4,6 +4,25 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Lexis.iml" filepath="$PROJECT_DIR$/.idea/modules/Lexis.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Lexis.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Lexis.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Lexis.app.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Lexis.app.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Lexis.app.main.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Lexis.app.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/Lexis.app.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/app/Lexis.app.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cardstackview/Lexis.cardstackview.iml" filepath="$PROJECT_DIR$/.idea/modules/cardstackview/Lexis.cardstackview.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cardstackview/Lexis.cardstackview.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/cardstackview/Lexis.cardstackview.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cardstackview/Lexis.cardstackview.main.iml" filepath="$PROJECT_DIR$/.idea/modules/cardstackview/Lexis.cardstackview.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/cardstackview/Lexis.cardstackview.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/cardstackview/Lexis.cardstackview.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/flipview/Lexis.flipview.iml" filepath="$PROJECT_DIR$/.idea/modules/flipview/Lexis.flipview.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/flipview/Lexis.flipview.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/flipview/Lexis.flipview.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/flipview/Lexis.flipview.main.iml" filepath="$PROJECT_DIR$/.idea/modules/flipview/Lexis.flipview.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/flipview/Lexis.flipview.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/flipview/Lexis.flipview.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/likebutton/Lexis.likebutton.iml" filepath="$PROJECT_DIR$/.idea/modules/likebutton/Lexis.likebutton.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/likebutton/Lexis.likebutton.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/likebutton/Lexis.likebutton.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/likebutton/Lexis.likebutton.main.iml" filepath="$PROJECT_DIR$/.idea/modules/likebutton/Lexis.likebutton.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/likebutton/Lexis.likebutton.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/likebutton/Lexis.likebutton.unitTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/recyclerview-swipedecorator/Lexis.recyclerview-swipedecorator.iml" filepath="$PROJECT_DIR$/.idea/modules/recyclerview-swipedecorator/Lexis.recyclerview-swipedecorator.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/recyclerview-swipedecorator/Lexis.recyclerview-swipedecorator.androidTest.iml" filepath="$PROJECT_DIR$/.idea/modules/recyclerview-swipedecorator/Lexis.recyclerview-swipedecorator.androidTest.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/recyclerview-swipedecorator/Lexis.recyclerview-swipedecorator.main.iml" filepath="$PROJECT_DIR$/.idea/modules/recyclerview-swipedecorator/Lexis.recyclerview-swipedecorator.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/recyclerview-swipedecorator/Lexis.recyclerview-swipedecorator.unitTest.iml" filepath="$PROJECT_DIR$/.idea/modules/recyclerview-swipedecorator/Lexis.recyclerview-swipedecorator.unitTest.iml" />
     </modules>
   </component>
 </project>

@@ -1,8 +1,9 @@
 package com.example.lexis.adapters;
 
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
+import android.widget.Button;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -13,6 +14,8 @@ import com.example.lexis.models.Word;
 import com.example.lexis.utilities.Utils;
 import com.like.LikeButton;
 import com.like.OnLikeListener;
+
+
 
 import org.jetbrains.annotations.NotNull;
 
@@ -81,6 +84,8 @@ public class FlashcardsAdapter extends RecyclerView.Adapter<FlashcardsAdapter.Fl
             LikeButton starButtonFront = binding.layoutFront.btnStar;
             LikeButton starButtonRear = binding.layoutRear.btnStar;
 
+            starButtonFront.setClickable(word.getIsStarred());
+            starButtonRear.setClickable(word.getIsStarred());
             starButtonFront.setLiked(word.getIsStarred());
             starButtonRear.setLiked(word.getIsStarred());
             starButtonFront.setOnLikeListener(createOnLikeListener(word));

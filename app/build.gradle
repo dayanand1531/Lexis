@@ -3,14 +3,14 @@ plugins {
 }
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion "30.0.3"
+    compileSdkVersion 35
+    //buildToolsVersion "30.0.3"
     useLibrary 'org.apache.http.legacy'
 
     defaultConfig {
         applicationId "com.example.lexis"
         minSdkVersion 21
-        targetSdkVersion 30
+        targetSdkVersion 35
         versionCode 1
         versionName "1.0"
 
@@ -24,13 +24,16 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_18
+        targetCompatibility JavaVersion.VERSION_18
     }
 
     buildFeatures {
         viewBinding true
     }
+
+        namespace "com.example.lexis"  // Replace with your actual package name
+
 
     packagingOptions {
         exclude 'project.properties'
@@ -41,32 +44,31 @@ android {
 
 dependencies {
 
-    implementation 'androidx.annotation:annotation:1.2.0'
-    implementation 'androidx.appcompat:appcompat:1.3.0'
-    implementation 'com.google.android.material:material:1.4.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation 'androidx.annotation:annotation:1.9.1'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.1'
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
-    testImplementation 'junit:junit:4.+'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.2.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
 
     // Parse for backend
     implementation 'com.github.parse-community.Parse-SDK-Android:parse:1.24.1'
 
     // CodePath Async HTTP Client for API requests
-    implementation 'com.codepath.libraries:asynchttpclient:2.1.1'
+
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 
     // Google Translate API for translations
-    implementation('com.google.cloud:google-cloud-translate:1.12.0') {
-        exclude group: 'org.apache.httpcomponents'
-        exclude group: 'org.json', module: 'json'
-    }
-    annotationProcessor 'com.google.cloud:google-cloud-translate:1.12.0'
+    implementation 'com.google.cloud:google-cloud-translate:2.24.0'
+
+    annotationProcessor 'com.google.cloud:google-cloud-translate:2.24.0'
 
     // Google NLP API for entity recognition
     implementation platform('com.google.cloud:libraries-bom:20.9.0')
     implementation 'com.google.cloud:google-cloud-language'
-    implementation 'io.grpc:grpc-okhttp:0.9.0'
+    implementation 'io.grpc:grpc-okhttp:1.62.2'
 
     // Parceler for passing objects
     implementation 'org.parceler:parceler-api:1.1.12'
@@ -80,32 +82,42 @@ dependencies {
     implementation 'commons-validator:commons-validator:1.7'
 
     // Flip view & card view for flashcards
-    implementation 'eu.davidea:flipview:1.2.0'
+    //implementation 'eu.davidea:flipview:1.2.0'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'com.yuyakaido.android:card-stack-view:2.3.4'
+    //implementation 'com.yuyakaido.android:card-stack-view:2.3.4'
+
+   // implementation 'com.github.ongakuer:FlipView:1.0.3'
+    //implementation 'com.yuyakaido.android:card-stack-view:2.3.5'
 
     // Coordinator layout for collapsing search bar
-    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.1.0'
+    implementation 'androidx.coordinatorlayout:coordinatorlayout:1.3.0'
 
     // Drag select for word search
     implementation 'com.github.MFlisar:DragSelectRecyclerView:0.3'
 
     // SwipeDecorator for adding background when swiping
-    implementation 'it.xabaras.android:recyclerview-swipedecorator:1.2.3'
+   // implementation 'it.xabaras.android:recyclerview-swipedecorator:1.2.3'
+    //implementation 'it.xabaras.android:recyclerview-swipedecorator:1.4'
 
     // ICU4J for internationalization
     implementation 'com.ibm.icu:icu4j:51.1'
 
     // Like button for starring animation
-    implementation 'com.github.jd-alexander:LikeButton:0.2.3'
+   // implementation 'com.github.jd-alexander:LikeButton:0.2.3'
+   // implementation 'com.github.jd-alexander:LikeButton:0.2.3'
 
     // MaterialDrawer for custom navigation drawer
     implementation 'com.mikepenz:materialdrawer:8.4.2'
 
     // Glide for loading images
-    implementation 'com.github.bumptech.glide:glide:4.12.0'
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
 
     // Badge for editing profile picture
     implementation 'io.github.nikartm:image-support:2.0.0'
+
+    implementation project(":likebutton")
+    implementation project(":flipview")
+    implementation project(":recyclerview-swipedecorator")
+    implementation project(":cardstackview")
 }

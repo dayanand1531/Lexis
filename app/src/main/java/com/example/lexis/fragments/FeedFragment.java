@@ -1,6 +1,8 @@
 package com.example.lexis.fragments;
 
 import android.os.Bundle;
+import android.os.Looper;
+import android.os.Handler;
 
 import androidx.annotation.NonNull;
 
@@ -14,14 +16,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.codepath.asynchttpclient.AsyncHttpClient;
-import com.codepath.asynchttpclient.RequestParams;
-import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
-import com.example.lexis.R;
-import com.example.lexis.adapters.ArticlesAdapter;
+
 import com.example.lexis.databinding.FragmentFeedBinding;
-import com.example.lexis.models.Article;
-import com.example.lexis.utilities.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,8 +31,23 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 import java.util.Set;
+import java.io.IOException;
 
-import okhttp3.Headers;
+import com.example.lexis.R;
+import com.example.lexis.adapters.ArticlesAdapter;
+import com.example.lexis.models.Article;
+import com.example.lexis.utilities.Utils;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.HttpUrl;
+import okhttp3.Request;
+import okhttp3.FormBody;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
+import okhttp3.OkHttpClient;
 
 public class FeedFragment extends Fragment {
 
@@ -123,31 +134,45 @@ public class FeedFragment extends Fragment {
         String day = String.format(Locale.getDefault(), "%02d", date.get(Calendar.DAY_OF_MONTH));
         if (allDays) day = "all-days"; // get top articles for all days of the month
 
-        AsyncHttpClient client = new AsyncHttpClient();
+        okhttp3.OkHttpClient client = new okhttp3.OkHttpClient();
         String formattedUrl = String.format(WIKI_TOP_ARTICLES_URL, year, month, day);
-        client.get(formattedUrl, null, new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Headers headers, JSON json) {
-                JSONObject jsonObject = json.jsonObject;
-                try {
-                    JSONObject items = jsonObject.getJSONArray("items").getJSONObject(0);
-                    JSONArray jsonArticles = items.getJSONArray("articles");
 
-                    // get first 20 content articles
-                    // (skip first two, which are main page and search)
-                    for (int i = 2; i < 22; i++) {
-                        JSONObject jsonArticle = jsonArticles.getJSONObject(i);
-                        String title = jsonArticle.getString("article");
-                        fetchWikipediaArticle(title, i);
-                    }
-                } catch (JSONException e) {
-                    Log.e(TAG, "JSON Exception", e);
-                }
+        okhttp3.Request request = new okhttp3.Request.Builder()
+                .url(formattedUrl)
+                .build();
+
+        client.newCall(request).enqueue(new okhttp3.Callback() {
+            @Override
+            public void onFailure(@NonNull okhttp3.Call call, @NonNull java.io.IOException e) {
+                Log.e(TAG, "onFailure to fetch article", e);
             }
 
             @Override
-            public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
-                Log.e(TAG, "onFailure to fetch article", throwable);
+            public void onResponse(@NonNull okhttp3.Call call, @NonNull Response response) throws java.io.IOException {
+                if (response.isSuccessful()) {
+                    String responseBody = response.body().string();
+                    try {
+                        JSONObject jsonObject = new JSONObject(responseBody);
+                        JSONObject items = jsonObject.getJSONArray("items").getJSONObject(0);
+                        JSONArray jsonArticles = items.getJSONArray("articles");
+                        final int numArticlesToFetch = 20;
+                        // get first 20 content articles
+                        // (skip first two, which are main page and search)
+                        for (int i = 2; i < numArticlesToFetch + 2; i++) {
+                            JSONObject jsonArticle = jsonArticles.getJSONObject(i);
+                            String title = jsonArticle.getString("article");
+                            // Use a Handler to post to the main thread
+                            int finalI = i;
+                            new Handler(getActivity().getMainLooper()).post(() -> {
+                                fetchWikipediaArticle(title, finalI);
+                            });
+                        }
+                    } catch (JSONException e) {
+                        Log.e(TAG, "JSON Exception", e);
+                    }
+                } else {
+                    Log.e(TAG, "Request failed with code: " + response.code());
+                }
             }
         });
 
@@ -155,56 +180,71 @@ public class FeedFragment extends Fragment {
 
     /*
     Fetch the Wikipedia article with the given title from the API, create a new Article object
-    and add it to the list of articles.
+    and add it to the list of articles..
     */
     private void fetchWikipediaArticle(String title, int index) {
-        AsyncHttpClient client = new AsyncHttpClient();
-        RequestParams params = new RequestParams();
-        params.put("action", "query");
-        params.put("format", "json");
-        params.put("titles", title);
-        params.put("prop", "extracts|info");
-        params.put("inprop", "url");
-        params.put("explaintext", true); // get plain text representation
-        params.put("exintro", true); // only get intro paragraph
+        OkHttpClient client = new OkHttpClient();
+        HttpUrl.Builder urlBuilder = HttpUrl.parse(WIKI_ARTICLE_URL).newBuilder();
+        urlBuilder.addQueryParameter("action", "query");
+        urlBuilder.addQueryParameter("format", "json");
+        urlBuilder.addQueryParameter("titles", title);
+        urlBuilder.addQueryParameter("prop", "extracts|info");
+        urlBuilder.addQueryParameter("inprop", "url");
+        urlBuilder.addQueryParameter("explaintext", "true");
+        urlBuilder.addQueryParameter("exintro", "true");
+        String url = urlBuilder.build().toString();
 
-        client.get(WIKI_ARTICLE_URL, params, new JsonHttpResponseHandler() {
+        okhttp3.Request request = new okhttp3.Request.Builder()
+                .url(url)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            Handler mainHandler = new Handler(Looper.getMainLooper());
+
             @Override
-            public void onSuccess(int statusCode, Headers headers, JSON json) {
-                JSONObject jsonObject = json.jsonObject;
-                try {
-                    // skip special Wikipedia pages
-                    if (!title.startsWith("Wikipedia:") && !title.startsWith("Special:")) {
-                        JSONObject pages = jsonObject
-                                .getJSONObject("query")
-                                .getJSONObject("pages");
-                        JSONObject articleObject = pages.getJSONObject(pages.keys().next());
-
-                        // extract information from JSON object and do text pre-processing
-                        String source = "Wikipedia";
-                        String url = articleObject.getString("fullurl");
-                        String title = articleObject.getString("title");
-                        String intro = articleObject.getString("extract");
-                        intro = intro.replace("\n", "\n\n");
-
-                        Article article = new Article(title, intro, source, url);
-                        articles.add(article);
-                        adapter.notifyItemInserted(articles.size() - 1);
-                    }
-
-                    // finished adding articles
-                    if (index == 21) {
-                        numCallsCompleted++;
-                        checkIfFetchingCompleted();
-                    }
-                } catch (JSONException e) {
-                    Log.d(TAG, "JSON Exception", e);
-                }
+            public void onFailure(@NonNull Call call, @NonNull java.io.IOException e) {
+                Log.e(TAG, "onFailure to fetch article", e);
             }
 
+
             @Override
-            public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
-                Log.d(TAG, "onFailure to fetch Wikipedia article");
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws java.io.IOException {
+                if (response.isSuccessful()) {
+                    String responseBody = response.body().string();
+                    try {
+                        JSONObject jsonObject = new JSONObject(responseBody);
+                        String finalTitle = title;
+                        mainHandler.post(() -> {
+                            try {
+                                if (!finalTitle.startsWith("Wikipedia:") && !finalTitle.startsWith("Special:")) {
+                                    JSONObject pages = jsonObject
+                                            .getJSONObject("query")
+                                            .getJSONObject("pages");
+                                    JSONObject articleObject = pages.getJSONObject(pages.keys().next());
+
+                                    // extract information from JSON object and do text pre-processing
+                                    String source = "Wikipedia";
+                                    String url = articleObject.getString("fullurl");
+                                    String title = articleObject.getString("title");
+                                    String intro = articleObject.getString("extract");
+                                    intro = intro.replace("\n", "\n\n");
+
+                                    Article article = new Article(title, intro, source, url);
+                                    articles.add(article);
+                                    adapter.notifyItemInserted(articles.size() - 1);
+                                }
+                                if (index == 21) { // 2 + 20 = 22, but we start from index 2
+                                    numCallsCompleted++;
+                                    checkIfFetchingCompleted();
+                                }
+                            } catch (JSONException e) {
+                                Log.d(TAG, "JSON Exception", e);
+                            }
+                        });
+                    } catch (JSONException e) {
+                        Log.e(TAG, "JSON Exception", e);
+                    }
+                }
             }
         });
     }
@@ -213,44 +253,55 @@ public class FeedFragment extends Fragment {
     Fetch the top headlines from the provided list of sources.
     */
     private void fetchTopHeadlines(List<String> sources) {
-        AsyncHttpClient client = new AsyncHttpClient();
-        RequestParams params = new RequestParams();
-        params.put("apiKey", getString(R.string.news_api_key));
-        params.put("sources", TextUtils.join(",", sources));
+        OkHttpClient client = new OkHttpClient();
+        HttpUrl.Builder urlBuilder = HttpUrl.parse(TOP_HEADLINES_URL).newBuilder();
+        urlBuilder.addQueryParameter("apiKey", getString(R.string.news_api_key));
+        urlBuilder.addQueryParameter("sources", TextUtils.join(",", sources));
+        String url = urlBuilder.build().toString();
 
-        client.get(TOP_HEADLINES_URL, params, new JsonHttpResponseHandler() {
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
             @Override
-            public void onSuccess(int statusCode, Headers headers, JSON json) {
-                JSONObject jsonObject = json.jsonObject;
-                try {
-                    JSONArray articlesArray = jsonObject.getJSONArray("articles");
-                    for (int i = 0; i < articlesArray.length(); i++) {
-                        JSONObject articleObject = articlesArray.getJSONObject(i);
-
-                        String title = articleObject.getString("title");
-                        String content = articleObject.getString("content");
-                        int truncatedIndex = content.indexOf("[+");
-                        if (truncatedIndex != -1) {
-                            content = content.substring(0, truncatedIndex);
-                        }
-                        String source = articleObject.getJSONObject("source").getString("name");
-                        String url = articleObject.getString("url");
-
-                        Article article = new Article(title, content, source, url);
-                        articles.add(article);
-                        adapter.notifyItemInserted(articles.size() - 1);
-                    }
-
-                    numCallsCompleted++;
-                    checkIfFetchingCompleted();
-                } catch (JSONException e) {
-                    Log.e(TAG, "JSON Exception", e);
-                }
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.e(TAG, "onFailure to fetch top headlines", e);
             }
 
             @Override
-            public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
-                Log.e(TAG, "onFailure to fetch top headlines", throwable);
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    String responseBody = response.body().string();
+                    try {
+                        JSONObject jsonObject = new JSONObject(responseBody);
+                        JSONArray articlesArray = jsonObject.getJSONArray("articles");
+                        new Handler(Looper.getMainLooper()).post(() -> {
+                            try {
+                                for (int i = 0; i < articlesArray.length(); i++) {
+                                    JSONObject articleObject = articlesArray.getJSONObject(i);
+                                    String title = articleObject.getString("title");
+                                    String content = articleObject.getString("content");
+                                    int truncatedIndex = content.indexOf("[+");
+                                    if (truncatedIndex != -1) {
+                                        content = content.substring(0, truncatedIndex);
+                                    }
+                                    String source = articleObject.getJSONObject("source").getString("name");
+                                    String url = articleObject.getString("url");
+                                    Article article = new Article(title, content, source, url);
+                                    articles.add(article);
+                                    adapter.notifyItemInserted(articles.size() - 1);
+                                }
+                                numCallsCompleted++;
+                                checkIfFetchingCompleted();
+                            } catch (JSONException e) {
+                                Log.e(TAG, "JSON Exception", e);
+                            }
+                        });
+                    } catch (JSONException e) {
+                        Log.e(TAG, "JSON Exception", e);
+                    }
+                }
             }
         });
     }
@@ -259,41 +310,53 @@ public class FeedFragment extends Fragment {
     Fetch 20 random short stories.
     */
     private void fetchShortStories(int n) {
-        AsyncHttpClient client = new AsyncHttpClient();
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(SHORT_STORIES_URL)
+                .build();
+
         Set<Integer> storiesAdded = new HashSet<>();
 
-        client.get(SHORT_STORIES_URL, null, new JsonHttpResponseHandler() {
+        client.newCall(request).enqueue(new Callback() {
+            Handler mainHandler = new Handler(Looper.getMainLooper());
             @Override
-            public void onSuccess(int statusCode, Headers headers, JSON json) {
-                JSONArray jsonArray = json.jsonArray;
-                try {
-                    Random rand = new Random();
-                    for (int i = 0; i < n; i++) {
-                        // generate random index for story we haven't added yet
-                        int index = rand.nextInt(jsonArray.length());
-                        while (storiesAdded.contains(index)) index = rand.nextInt(jsonArray.length());
-                        storiesAdded.add(index);
-
-                        JSONObject story = jsonArray.getJSONObject(index);
-                        String title = story.getString("title");
-                        String content = story.getString("story") + " " + story.getString("moral");
-                        String source = "Short stories";
-
-                        Article article = new Article(title, content, source, null);
-                        articles.add(article);
-                        adapter.notifyItemInserted(articles.size() - 1);
-                    }
-
-                    numCallsCompleted++;
-                    checkIfFetchingCompleted();
-                } catch (JSONException e) {
-                    Log.e(TAG, "JSON Exception", e);
-                }
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.e(TAG, "onFailure to fetch short stories", e);
             }
 
             @Override
-            public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
-                Log.e(TAG, "onFailure to fetch short stories", throwable);
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if(response.isSuccessful()){
+                    String responseBody = response.body().string();
+                    try {
+                        JSONArray jsonArray = new JSONArray(responseBody);
+                        Random rand = new Random();
+                        for (int i = 0; i < n; i++) {
+                            // generate random index for story we haven't added yet
+                            int index = rand.nextInt(jsonArray.length());
+                            while (storiesAdded.contains(index)) index = rand.nextInt(jsonArray.length());
+                            storiesAdded.add(index);
+
+                            JSONObject story = jsonArray.getJSONObject(index);
+                            String title = story.getString("title");
+                            String content = story.getString("story") + " " + story.getString("moral");
+                            String source = "Short stories";
+
+                            Article article = new Article(title, content, source, null);
+                            mainHandler.post(() -> {
+                                articles.add(article);
+                                adapter.notifyItemInserted(articles.size() - 1);
+                            });
+                        }
+
+                        mainHandler.post(() -> {
+                            numCallsCompleted++;
+                            checkIfFetchingCompleted();
+                        });
+                    } catch (JSONException e) {
+                        Log.e(TAG, "JSON Exception", e);
+                    }
+                }
             }
         });
     }
@@ -302,44 +365,61 @@ public class FeedFragment extends Fragment {
     Fetch recent NYT articles.
     */
     private void fetchNYTArticles() {
-        AsyncHttpClient client = new AsyncHttpClient();
-        RequestParams params = new RequestParams();
-        params.put("api-key", getString(R.string.new_york_times_api_key));
+        OkHttpClient client = new OkHttpClient();
+        HttpUrl.Builder urlBuilder = HttpUrl.parse(NYT_ARTICLE_SEARCH_URL).newBuilder();
+        urlBuilder.addQueryParameter("api-key", getString(R.string.new_york_times_api_key));
+        String url = urlBuilder.build().toString();
 
-        client.get(NYT_ARTICLE_SEARCH_URL, params, new JsonHttpResponseHandler() {
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            Handler mainHandler = new Handler(Looper.getMainLooper());
             @Override
-            public void onSuccess(int statusCode, Headers headers, JSON json) {
-                JSONObject jsonObject = json.jsonObject;
-                try {
-                    JSONArray articlesArray = jsonObject
-                            .getJSONObject("response")
-                            .getJSONArray("docs");
-                    for (int i = 0; i < NUM_STORIES_TO_FETCH; i++) {
-                        JSONObject articleObject = articlesArray.getJSONObject(i);
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                Log.e(TAG, "onFailure to fetch short stories", e);
+            }
 
-                        String title = articleObject
-                                .getJSONObject("headline")
-                                .getString("main");
-                        String content = articleObject.getString("lead_paragraph");
-                        String source = "The New York Times";
-                        String url = articleObject.getString("web_url");
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if(response.isSuccessful()){
+                    String responseBody = response.body().string();
+                    try {
+                        JSONObject jsonObject = new JSONObject(responseBody);
+                        JSONArray articlesArray = jsonObject
+                                .getJSONObject("response")
+                                .getJSONArray("docs");
+                        for (int i = 0; i < NUM_STORIES_TO_FETCH; i++) {
+                            JSONObject articleObject = articlesArray.getJSONObject(i);
 
-                        Article article = new Article(title, content, source, url);
-                        articles.add(article);
-                        adapter.notifyItemInserted(articles.size() - 1);
+                            String title = articleObject
+                                    .getJSONObject("headline")
+                                    .getString("main");
+                            String content = articleObject.getString("lead_paragraph");
+                            String source = "The New York Times";
+                            String url = articleObject.getString("web_url");
+
+                            Article article = new Article(title, content, source, url);
+                            mainHandler.post(() -> {
+                                articles.add(article);
+                                adapter.notifyItemInserted(articles.size() - 1);
+                            });
+                        }
+
+                        mainHandler.post(() -> {
+                            numCallsCompleted++;
+                            checkIfFetchingCompleted();
+                        });
+                    } catch (JSONException e) {
+                        Log.e(TAG, "JSON Exception", e);
                     }
-
-                    numCallsCompleted++;
-                    checkIfFetchingCompleted();
-                } catch (JSONException e) {
-                    Log.e(TAG, "JSON Exception", e);
                 }
             }
-
-            @Override
+            /*@Override
             public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
                 Log.e(TAG, "onFailure to fetch top headlines", throwable);
-            }
+            }*/
         });
     }
 
