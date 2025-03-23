@@ -1,0 +1,16 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 35
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 35
+    }
+
+    namespace "com.yuyakaido.android.cardstackview"
+}
+
+dependencies {
+    implementation 'androidx.recyclerview:recyclerview:1.4.0'
+}

@@ -1,0 +1,76 @@
+import com.vanniktech.maven.publish.SonatypeHost
+
+plugins {
+    id 'com.android.library'
+    id "com.vanniktech.maven.publish" version "0.23.1"
+}
+
+
+int VERSION_CODE = 8
+String VERSION_NAME = "1.4"
+
+android {
+    compileSdkVersion 35
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion 35
+        versionCode VERSION_CODE
+        versionName VERSION_NAME
+
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    namespace "it.xabaras.android.recyclerview.swipedecorator"
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestImplementation('androidx.test.espresso:espresso-core:3.1.0', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.recyclerview:recyclerview:1.4.0'
+    testImplementation 'junit:junit:4.13.2'
+}
+
+mavenPublishing {
+    coordinates("it.xabaras.android", "recyclerview-swipedecorator", "1.4")
+
+    pom {
+        name = "RecyclerViewSwipeDecorator"
+        description = "A simple utility class to add a background and/or an icon and/or a label while swiping a RecyclerView item left or right."
+        inceptionYear = "2018"
+        url = "https://github.com/xabaras/RecyclerViewSwipeDecorator"
+        licenses {
+            license {
+                name = "The Apache License, Version 2.0"
+                url = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+                distribution = "http://www.apache.org/licenses/LICENSE-2.0.txt"
+            }
+        }
+        developers {
+            developer {
+                id = "xabaras"
+                name = "Paolo Montalto"
+                url = "https://github.com/xabaras/"
+                email = "p.montalto@xabaras.it"
+            }
+        }
+        scm {
+            url = "https://github.com/xabaras/RecyclerViewSwipeDecorator/"
+            connection = "scm:git:git://github.com/xabaras/RecyclerViewSwipeDecorator.git"
+            developerConnection = "scm:git:ssh://git@github.com/xabaras/RecyclerViewSwipeDecorator.git"
+        }
+    }
+
+    publishToMavenCentral(SonatypeHost.DEFAULT)
+    signAllPublications()
+}

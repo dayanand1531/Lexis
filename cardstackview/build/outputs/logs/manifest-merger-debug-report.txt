@@ -1,0 +1,15 @@
+-- Merging decision tree log ---
+manifest
+ADDED from G:\Lexi\cardstackview\src\main\AndroidManifest.xml:3:1-58
+INJECTED from G:\Lexi\cardstackview\src\main\AndroidManifest.xml:3:1-58
+	package
+		ADDED from G:\Lexi\cardstackview\src\main\AndroidManifest.xml:3:11-56
+		INJECTED from G:\Lexi\cardstackview\src\main\AndroidManifest.xml
+uses-sdk
+INJECTED from G:\Lexi\cardstackview\src\main\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from G:\Lexi\cardstackview\src\main\AndroidManifest.xml
+INJECTED from G:\Lexi\cardstackview\src\main\AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from G:\Lexi\cardstackview\src\main\AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from G:\Lexi\cardstackview\src\main\AndroidManifest.xml

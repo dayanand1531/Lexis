@@ -1,0 +1,32 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 35
+
+    defaultConfig {
+        minSdkVersion 21
+        targetSdkVersion targetSdk
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    namespace "eu.davidea.flipview"
+}
+
+dependencies {
+    //See main build.gradle for values & versions
+    implementation "androidx.appcompat:appcompat:1.7.0"
+    compileOnly "androidx.annotation:annotation:1.6.0"
+}
+
+// Execute: gradlew clean install -P flipview
+if (project.hasProperty('all') || project.hasProperty('flipview')) {
+    apply from: '../install.gradle'
+    apply from: '../bintray.gradle'
+}
